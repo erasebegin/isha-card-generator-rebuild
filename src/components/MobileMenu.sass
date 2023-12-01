@@ -1,0 +1,38 @@
+@import '../_variables'
+
+.mobile-menu
+    display: flex
+    flex-direction: column
+    justify-content: center
+    background: $brown-dark
+    height: 100dvh
+    text-align: left
+    position: absolute
+    top: 0
+    left: 0
+    transition: transform 0.3s ease-in-out
+    transform: translateX(-100%)
+
+    &.open
+        transform: translateX(0%)
+
+    @media (max-width: $mobile)
+        width: 100%
+
+    a
+        font-size: 2rem
+        text-transform: uppercase
+        padding: 2rem 0
+        font-weight: bold
+        letter-spacing: 0.5rem
+        color: $brown-light
+        text-decoration: none
+        transition: 200ms ease-in-out
+
+        @media (max-width: $mobile)
+            font-size: 1.5rem
+            text-align: center
+
+        &:hover
+            transition: 200ms ease-in-out
+            filter: brightness(150%)

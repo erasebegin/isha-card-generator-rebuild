@@ -1,7 +1,12 @@
+@import '../_variables'
+
 .side-panel
     display: flex
     flex-direction: column
+    align-items: center
+    justify-content: center
     max-width: 450px
+    padding: 1rem
 
     .thumbnails
         display: flex
@@ -19,7 +24,7 @@
         cursor: pointer
 
         &.current
-            border: 3px solid red
+            // outline: 3px solid $brown-saturated
 
         img
             max-width: 75px

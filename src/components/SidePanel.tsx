@@ -1,3 +1,4 @@
+import { cardTextFormat } from "../data/data";
 import "./SidePanel.sass";
 
 type Props = {
@@ -8,7 +9,8 @@ type Props = {
 
 const SidePanel = ({ languageCode, currentImage, setCurrentImage }: Props) => {
   // set the total number of greetings card images in the selection panel
-  const numImages = 12;
+  const numImages = Object.keys(cardTextFormat).length;
+  console.log({ numImages });
 
   let thumbnailPaths: { index: number; path: string }[] = [];
 
@@ -20,8 +22,11 @@ const SidePanel = ({ languageCode, currentImage, setCurrentImage }: Props) => {
     <div className="side-panel">
       <div className="thumbnails">
         {thumbnailPaths.map((img) => (
-          <button onClick={() => setCurrentImage(img.index)}>
-            <img src={`/thumbnails/${img.path}.png`} alt="card thumbnail" />
+          <button
+            onClick={() => setCurrentImage(img.index)}
+            className={currentImage === img.index ? "current" : ""}
+          >
+            <img src={`/thumbnails/${languageCode}/${img.path}.png`} alt="card thumbnail" />
           </button>
         ))}
       </div>

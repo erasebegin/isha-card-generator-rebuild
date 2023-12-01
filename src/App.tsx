@@ -1,55 +1,62 @@
 import "./App.sass";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-import MobileMenu from "./components/MobileMenu";
-import MobileMenuButton from "./components/MobileMenuButton";
 import SidePanel from "./components/SidePanel";
 import { fabric } from "fabric";
 import { useEffect, useState } from "react";
+import { useWindowSize } from "@uidotdev/usehooks";
+import { cardText, cardTextFormat } from "./data/data";
+
+type LanguageCode = "en" | "es" | "ru" | "de" | "it" | "pt" | "fr";
 
 function App() {
-  const [text1, setText1] = useState("woop");
-  const [text2, setText2] = useState("wee");
+  const [languageCode, setLanguageCode] = useState<LanguageCode>("en");
+  const initialT1 = cardText[languageCode]?.t1 || "";
+  const initialT2 = cardText[languageCode]?.t2 || "";
+  const [text1, setText1] = useState(initialT1);
+  const [text2, setText2] = useState(initialT2);
   const [image, setImage] = useState<HTMLImageElement>();
   const [currentImage, setCurrentImage] = useState(1);
-  const [languageCode, setLanguageCode] = useState("en");
-  const [mobileMenuIsOpen, setMobileMenuIsOpen] = useState(false);
 
-  const src = `/img/card_${languageCode}_${currentImage}.png`
+  const { width: windowWidth } = useWindowSize();
 
-  const txtOptAll = () => ({
-    txt1: {
-      left: 10,
-      top: 60,
-      width: 300,
-      fill: "blue",
-      fontSize: 16,
-      fontWeight: 500,
-      fontFamily: "Montserrat",
-      textAlign: "center",
-      lineHeight: 1,
-    },
+  const src = `/img/${languageCode}/card_${languageCode}_${currentImage}.png`;
 
-    txt2: {
-      left: 10,
-      top: 195,
-      width: 300,
-      fill: "blue",
-      fontSize: 16,
-      fontWeight: 700,
-      fontFamily: "Montserrat",
-      textAlign: "center",
-      lineHeight: 1,
-    },
-  });
+  const txtOptions = {
+    width: 300,
+    fontSize: 16,
+    fontWeight: 500,
+    fontFamily: "Montserrat",
+    textAlign: "center",
+    lineHeight: 1,
+  };
 
   useEffect(() => {
     let canv = new fabric.Canvas("fabric-canvas");
-    const txt1 = new fabric.Textbox(text1, txtOptAll().txt1);
-    const txt2 = new fabric.Textbox(text2, txtOptAll().txt2);
+    const txt1 = new fabric.Textbox(text1, {
+      ...cardTextFormat[currentImage].t1,
+      ...txtOptions,
+    });
+    const txt2 = new fabric.Textbox(text1, {
+      ...cardTextFormat[currentImage].t2,
+      ...txtOptions,
+    });
 
-    canv.setWidth(500);
-    canv.setHeight(500);
+    if (windowWidth && windowWidth > 500) {
+      canv.setWidth(500);
+      canv.setHeight(500);
+    }
+
+    if (windowWidth && windowWidth < 500) {
+      canv.setWidth(windowWidth - 16);
+      canv.setHeight(windowWidth - 16);
+    }
+
+    // if (!windowWidth) {
+    //   canv.setWidth(500);
+    //   canv.setHeight(500);
+    // }
+
     canv.add(txt1);
     canv.add(txt2);
 
@@ -64,17 +71,12 @@ function App() {
     return () => {
       canv.dispose();
     };
-  }, [languageCode, currentImage]);
+  }, [languageCode, currentImage, windowWidth]);
 
   return (
     <div className="app">
-      <MobileMenuButton
-        mobileMenuIsOpen={mobileMenuIsOpen}
-        setMobileMenuIsOpen={setMobileMenuIsOpen}
-      />
-      <MobileMenu mobileMenuIsOpen={mobileMenuIsOpen} />
       <Header />
-      <canvas id="fabric-canvas"/>
+      <canvas id="fabric-canvas" />
       <SidePanel
         currentImage={currentImage}
         setCurrentImage={setCurrentImage}

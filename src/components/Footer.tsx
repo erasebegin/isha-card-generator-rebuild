@@ -1,4 +1,3 @@
-
 type Props = {}
 
 const Footer = (props: Props) => {

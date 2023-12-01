@@ -1,9 +1,14 @@
 import { fabric } from "fabric";
-import { useEffect, useState } from "react";
-import { useWindowSize } from "@uidotdev/usehooks";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { cardText, cardTextFormat } from "../data/data";
 import { LanguageCode } from "../App";
-import "./Canvas.sass"
+import "./Canvas.sass";
 
 type Props = { languageCode: LanguageCode; currentImage: number };
 
@@ -15,7 +20,7 @@ type CardTextFormatType = {
   };
 };
 
-const Canvas = ({ languageCode, currentImage }: Props) => {
+const Canvas = forwardRef(({ languageCode, currentImage }: Props, ref) => {
   const initialT1 = cardText[languageCode]?.t1 || "";
   const initialT2 = cardText[languageCode]?.t2 || "";
   const initialTformat1 =
@@ -27,7 +32,7 @@ const Canvas = ({ languageCode, currentImage }: Props) => {
   const [text1Format, setText1Format] = useState(initialTformat1);
   const [text2Format, setText2Format] = useState(initialTformat2);
 
-  const { width: windowWidth } = useWindowSize();
+  const canvRef = useRef(null);
 
   const src = `/img/${languageCode}/card_${languageCode}_${currentImage}.png`;
   console.log((cardTextFormat as CardTextFormatType)[currentImage].text1);
@@ -57,7 +62,7 @@ const Canvas = ({ languageCode, currentImage }: Props) => {
   };
 
   useEffect(() => {
-    let canv = new fabric.Canvas("fabric-canvas");
+    canvRef.current = new fabric.Canvas("fabric-canvas");
     const txt1 = new fabric.Textbox(text1, {
       ...t1Options,
       ...txtOptions,
@@ -67,8 +72,8 @@ const Canvas = ({ languageCode, currentImage }: Props) => {
       ...txtOptions,
     });
 
-    canv.setWidth(350);
-    canv.setHeight(350);
+    canvRef.current.setWidth(350);
+    canvRef.current.setHeight(350);
 
     // if (windowWidth && windowWidth > 500) {
     //   canv.setWidth(500);
@@ -80,26 +85,49 @@ const Canvas = ({ languageCode, currentImage }: Props) => {
     //   canv.setHeight(windowWidth - 16);
     // }
 
-    canv.add(txt1);
-    canv.add(txt2);
+    canvRef.current.add(txt1);
+    canvRef.current.add(txt2);
 
     fabric.Image.fromURL(src, function (img) {
       // add background image
-      canv.setBackgroundImage(img, canv.renderAll.bind(canv), {
-        scaleX: canv.width && img.width && canv.width / img.width,
-        scaleY: canv.height && img.height && canv.height / img.height,
-      });
+      canvRef.current.setBackgroundImage(
+        img,
+        canvRef.current.renderAll.bind(canvRef.current),
+        {
+          scaleX:
+            canvRef.current.width &&
+            img.width &&
+            canvRef.current.width / img.width,
+          scaleY:
+            canvRef.current.height &&
+            img.height &&
+            canvRef.current.height / img.height,
+        }
+      );
     });
 
     return () => {
-      canv.dispose();
+      canvRef.current.dispose();
     };
   }, [languageCode, currentImage]);
+
+  const downloadCanvasContent = () => {
+    let dataURL = canvRef.current.toDataURL({ format: "png" });
+    let a = document.createElement("a");
+    a.href = dataURL;
+    a.download = "canvas.png";
+    a.click();
+  };
+
+  useImperativeHandle(ref, () => ({
+    downloadCanvasContent,
+  }));
+
   return (
     <div className="canvas-container">
       <canvas id="fabric-canvas" />
     </div>
   );
-};
+});
 
 export default Canvas;
